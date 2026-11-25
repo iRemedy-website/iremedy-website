@@ -24,7 +24,58 @@ const pool = new Pool({
 });
 
 console.log("DATABASE_URL loaded:", !!process.env.DATABASE_URL);
+// Paystack Webhook
+app.post(
+  "/api/paystack/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    try {
+      const signature = req.headers["x-paystack-signature"];
 
+      if (!signature || !Buffer.isBuffer(req.body)) {
+        return res.sendStatus(401);
+      }
+
+      const expectedSignature = crypto
+        .createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
+        .update(req.body)
+        .digest("hex");
+
+      const received = Buffer.from(signature, "hex");
+      const expected = Buffer.from(expectedSignature, "hex");
+
+      if (
+        received.length !== expected.length ||
+        !crypto.timingSafeEqual(received, expected)
+      ) {
+        return res.sendStatus(401);
+      }
+
+      const event = JSON.parse(req.body.toString("utf8"));
+
+      if (event.event !== "charge.success") {
+        return res.sendStatus(200);
+      }
+
+      const reference = event.data?.reference;
+
+      if (!reference) {
+        return res.sendStatus(400);
+      }
+
+      // Reuse the existing Paystack verification route
+      await axios.get(
+        `https://iremedy-website.onrender.com/api/payments/paystack/verify/${encodeURIComponent(reference)}`
+      );
+
+      return res.sendStatus(200);
+
+    } catch (error) {
+      console.error("Paystack webhook error:", error.message);
+      return res.sendStatus(500);
+    }
+  }
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
