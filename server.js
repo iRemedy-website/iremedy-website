@@ -140,7 +140,7 @@ console.log(
       password,
       process.env.ADMIN_PASSWORD_HASH
     );
-
+console.log("Admin password matches:", validPassword);
     if (!validPassword) {
       return res.status(401).json({
         success: false,
