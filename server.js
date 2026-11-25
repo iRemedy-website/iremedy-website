@@ -120,7 +120,14 @@ app.post("/api/admin/login", async (req, res) => {
       message: "Enter your username and password"
     });
   }
-
+console.log(
+  "Admin username matches:",
+  username === process.env.ADMIN_USERNAME
+);
+console.log(
+  "Admin password hash exists:",
+  Boolean(process.env.ADMIN_PASSWORD_HASH)
+);
   if (username !== process.env.ADMIN_USERNAME) {
     return res.status(401).json({
       success: false,
