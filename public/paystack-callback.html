@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iRemedy Payment Verification</title>
+</head>
+<body style="font-family: Arial; text-align: center; padding: 40px;">
+
+  <h2>iRemedy Phones & Accessories</h2>
+  <h3 id="message">Verifying your payment...</h3>
+  <p id="details">Please wait. Do not close this page.</p>
+
+  <script>
+    async function verifyPayment() {
+      const params = new URLSearchParams(window.location.search);
+      const reference = params.get("reference");
+
+      if (!reference) {
+        document.getElementById("message").textContent =
+          "Payment reference not found.";
+
+        document.getElementById("details").textContent =
+          "Please contact iRemedy for assistance.";
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "/api/payments/paystack/verify/" +
+          encodeURIComponent(reference)
+        );
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          document.getElementById("message").textContent =
+            "Payment Successful!";
+
+          document.getElementById("details").textContent =
+            "Your order number is " + result.orderId +
+            ". Thank you for shopping with iRemedy!";
+        } else {
+          document.getElementById("message").textContent =
+            "Payment verification unsuccessful.";
+
+          document.getElementById("details").textContent =
+            result.message || "Please contact iRemedy.";
+        }
+
+      } catch (error) {
+        document.getElementById("message").textContent =
+          "Unable to verify payment.";
+
+        document.getElementById("details").textContent =
+          "Please contact iRemedy before trying to pay again.";
+      }
+    }
+
+    verifyPayment();
+  </script>
+
+</body>
+</html>

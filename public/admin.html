@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iRemedy Admin Login</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f1f4f9;
+  font-family: Arial, sans-serif;
+}
+
+.login-box {
+  width: 90%;
+  max-width: 400px;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+}
+
+h2 {
+  text-align: center;
+  color: #172033;
+}
+
+p {
+  text-align: center;
+  color: #667085;
+}
+
+input {
+  width: 100%;
+  padding: 13px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 6px;
+  background: #172033;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #263b60;
+}
+
+#message {
+  color: #c0392b;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+  <h2>iRemedy Admin</h2>
+  <p>Sign in to manage your store</p>
+
+  <form id="login-form">
+    <input
+      type="text"
+      id="username"
+      placeholder="Admin username"
+      required
+    >
+
+    <input
+      type="password"
+      id="password"
+      placeholder="Admin password"
+      required
+    >
+
+    <button type="submit">Login</button>
+  </form>
+
+  <p id="message"></p>
+</div>
+
+<script>
+document.getElementById("login-form").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
+  const message = document.getElementById("message");
+
+  message.textContent = "Checking login...";
+
+  try {
+    const response = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      window.location.href = "/admin-dashboard.html";
+    } else {
+      message.textContent = data.message || "Login failed";
+    }
+
+  } catch (error) {
+    message.textContent = "Unable to connect to the server";
+  }
+});
+</script>
+
+</body>
+</html>
